@@ -50,9 +50,10 @@ const EVENTS = [
       setFloorDisplay('b', '9F');
       setStatus('다른 엘베를 호출합니다...');
       setTimeout(() => {
-        animateFloor('b', 9, 5, 310, () => {
-          setStatus('어? 왜 내려가지...?');
-          animateFloor('b', 5, 8, 290, () => {
+        setStatus('어? 왜 내려가지...?');
+        animateFloor('b', 9, 1, 280, () => {
+          setStatus('1층까지 내려갔어?!');
+          animateFloor('b', 1, 8, 280, () => {
             setStatus('다시 올라오네! 이번엔 될 것 같아!!');
             setTimeout(() => {
               flickerFloor('b', 6, () => {
@@ -96,18 +97,20 @@ const EVENTS = [
         setStatus('드디어 왔다!! 이번엔 탈 수 있어!!!');
         setTimeout(() => {
           openDoor('a');
-          showCrowdEntering('b');          // crowd-b는 frame-a 안에 위치
-          setStatus('아......');
           setTimeout(() => {
-            closeDoor('a');
+            showCrowdEntering('b');          // crowd-b는 frame-a 안에 위치
+            setStatus('아.... 다른 사람들이 타네');
             setTimeout(() => {
-              hideCrowd('b');
-              setStatus('엘베가 1층으로 내려가고 있습니다...');
-              animateFloor('a', 10, 1, 200, null); // 배경 연출, 완료 대기 안함
-              setTimeout(onDone, 800);
-            }, 500);
-          }, 1600);
-        }, 400);
+              closeDoor('a');
+              setTimeout(() => {
+                hideCrowd('b');
+                setStatus('엘베가 1층으로 내려가고 있습니다...');
+                animateFloor('a', 10, 1, 200, null); // 배경 연출, 완료 대기 안함
+                setTimeout(onDone, 800);
+              }, 500);
+            }, 1600);
+          }, 700);
+        }, 1200);
       });
     }
   },
