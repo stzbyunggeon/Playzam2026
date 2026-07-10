@@ -10,12 +10,12 @@ const state = {
 };
 
 /* ══════════════════════════════════════════════════
-   6개 고정 이벤트 (순서 절대 변경 금지) — 합계 분노 100
+   4개 고정 이벤트 (순서 절대 변경 금지) — 합계 분노 100
 ══════════════════════════════════════════════════ */
 const EVENTS = [
-  /* 1. 가장 먼 엘베(A/B2) 잡힘 → 만원 → A 다시 내려감 — +18 */
+  /* 1. 가장 먼 엘베(A/B2) 잡힘 → 만원 → A 다시 내려감 — +25 */
   {
-    rageAdd: 18,
+    rageAdd: 25,
     play(onDone) {
       selectElev('a');
       setFloorDisplay('a', 'B2');
@@ -35,16 +35,16 @@ const EVENTS = [
                 animateFloor('a', 10, -2, 200, null); // 배경 연출, 완료 대기 안함
                 setTimeout(onDone, 800);
               }, 600);
-            }, 1800);
+            }, 1400);
           }, 650);
         }, 400);
       });
     }
   },
 
-  /* 2. B 호출 → 9층에서 5층으로 내려갔다가 올라오던 중 고장 — +14 */
+  /* 2. B 호출 → 9층에서 1층으로 내려갔다가 올라오던 중 고장 — +25 */
   {
-    rageAdd: 14,
+    rageAdd: 25,
     play(onDone) {
       selectElev('b');
       setFloorDisplay('b', '9F');
@@ -68,9 +68,9 @@ const EVENTS = [
     }
   },
 
-  /* 3. C가 9층까지 왔다가 B2에 있던 A로 배정 바뀜 — +16 */
+  /* 3. C가 9층까지 왔다가 B2에 있던 A로 배정 바뀜 — +20 */
   {
-    rageAdd: 16,
+    rageAdd: 20,
     play(onDone) {
       selectElev('c');
       setFloorDisplay('c', '1F');
@@ -87,56 +87,14 @@ const EVENTS = [
     }
   },
 
-  /* 4. 기다린 A가 왔지만 동료들이 우르르 타버림 — +18 */
+  /* 4. 배정된 B2 엘베가 왔지만 또 만원 → 분노 100 — +30 */
   {
-    rageAdd: 18,
+    rageAdd: 30,
     play(onDone) {
       selectElev('a');
-      setStatus('배정된 엘베가 B2층에서 올라오고 있습니다...');
+      setFloorDisplay('a', 'B2');
+      setStatus('배정된 B2 엘베가 올라오고 있습니다...');
       animateFloor('a', -2, 10, 260, () => {
-        setStatus('드디어 왔다!! 이번엔 탈 수 있어!!!');
-        setTimeout(() => {
-          openDoor('a');
-          setTimeout(() => {
-            showCrowdEntering('b');          // crowd-b는 frame-a 안에 위치
-            setStatus('아.... 다른 사람들이 타네');
-            setTimeout(() => {
-              closeDoor('a');
-              setTimeout(() => {
-                hideCrowd('b');
-                setStatus('엘베가 1층으로 내려가고 있습니다...');
-                animateFloor('a', 10, 1, 200, null); // 배경 연출, 완료 대기 안함
-                setTimeout(onDone, 800);
-              }, 500);
-            }, 1600);
-          }, 700);
-        }, 1200);
-      });
-    }
-  },
-
-  /* 5. C 재호출 → 점검중 — +14 */
-  {
-    rageAdd: 14,
-    play(onDone) {
-      selectElev('c');
-      setStatus('남은 엘베를 다시 호출합니다...');
-      animateFloor('c', 9, 10, 500, () => {
-        showBadge('c', 'repair', '점검중');
-        setStatus('점검 중으로 갑자기 멈춰버렸습니다!');
-        setTimeout(onDone, 1800);
-      });
-    }
-  },
-
-  /* 6. A밖에 없으니 호출 → 또 만원 → 분노 100 — +20 */
-  {
-    rageAdd: 20,
-    play(onDone) {
-      selectElev('a');
-      setFloorDisplay('a', '3F');
-      setStatus('엘베가 하나밖에 안 남았네...');
-      animateFloor('a', 3, 10, 280, () => {
         setStatus('이번엔 진짜 탈 수 있겠지...!!');
         showCrowd('a');
         setTimeout(() => {
