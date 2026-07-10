@@ -94,7 +94,7 @@ function onCallBtnClick() {
 const smashCounts    = { a: 0, b: 0, c: 0 };
 const smokeIntervals = {};
 let   destroyedCount = 0;
-const SMASH_DESTROY  = 5;   // 이 횟수 이상 타격 시 파괴
+const SMASH_DESTROY  = 10;  // 이 횟수 이상 타격 시 파괴
 
 function setupSmashClicks() {
   ['a', 'b', 'c'].forEach(id => {
@@ -134,55 +134,66 @@ function smashElevator(id, frame) {
 }
 
 function destroyElevator(id, frame) {
-  frame.classList.add('smashed');
-
-  // 폭발 파편 (대량)
   const rect = frame.getBoundingClientRect();
-  for (let i = 0; i < 32; i++) {
+
+  // 문 패널이 날아가는 연출 (즉시)
+  spawnDoorPanels(rect);
+
+  // 80ms 후 파괴 상태 비주얼 적용 (문 패널이 먼저 눈에 보이게)
+  setTimeout(() => frame.classList.add('smashed'), 80);
+
+  // 폭발 파편 (대량 — 엘베 색 중심)
+  for (let i = 0; i < 45; i++) {
     setTimeout(() => {
       spawnFragment(
-        rect.left + Math.random() * rect.width,
-        rect.top  + Math.random() * rect.height,
+        rect.left + rect.width  * (0.1 + Math.random() * 0.8),
+        rect.top  + rect.height * (0.05 + Math.random() * 0.9),
         true
       );
-    }, Math.random() * 320);
+    }, Math.random() * 380);
   }
 
-  // 연기 방출
+  // 연기 방출 (더 촘촘하게)
   const cx = rect.left + rect.width  * 0.5;
-  const cy = rect.top  + rect.height * 0.42;
+  const cy = rect.top  + rect.height * 0.40;
   smokeIntervals[id] = setInterval(() => {
     spawnSmoke(
-      cx + (Math.random() - 0.5) * rect.width  * 0.55,
-      cy + (Math.random() - 0.5) * rect.height * 0.28
+      cx + (Math.random() - 0.5) * rect.width  * 0.5,
+      cy + (Math.random() - 0.5) * rect.height * 0.25
     );
-  }, 250);
+  }, 150);
 
   destroyedCount++;
   if (destroyedCount >= 3) {
-    setTimeout(triggerGameOver, 2200);
+    setTimeout(triggerGameOver, 2500);
   }
 }
 
 function spawnFragment(x, y, big) {
-  const colors = ['#C0C4C8', '#9A9DA1', '#D4D7DA', '#FFB020', '#FF5030', '#FF2020', '#FFC040'];
-  const frag   = document.createElement('div');
+  // 엘베 철문 색 중심. big(폭발) 시 불꽃 색 혼합
+  const steel  = ['#7A7E82', '#9EA2A6', '#B6BABE', '#565A5E', '#686C70', '#C0C4C8'];
+  const sparks = ['#FFB020', '#FF6030', '#FF3510', '#FFCA40'];
+  const pool   = big
+    ? [...steel, ...steel, ...sparks]  // 약 60% 철 / 40% 불꽃
+    : [...steel, steel[0], steel[1]];  // 거의 철 색
+
+  const frag = document.createElement('div');
   frag.className = 'fragment';
 
-  const w   = big ? (12 + Math.random() * 22) : (5 + Math.random() * 12);
-  const h   = w * (0.22 + Math.random() * 0.88);
-  const dur = 0.50 + Math.random() * 0.45;
+  const w   = big ? (14 + Math.random() * 26) : (8 + Math.random() * 16);
+  const h   = w * (0.18 + Math.random() * 0.90);
+  const dur = 0.50 + Math.random() * 0.48;
 
   frag.style.left         = x + 'px';
   frag.style.top          = y + 'px';
   frag.style.width        = w.toFixed(0) + 'px';
   frag.style.height       = h.toFixed(0) + 'px';
-  frag.style.borderRadius = (Math.random() < 0.35 ? '50%' : '2px');
-  frag.style.background   = colors[Math.floor(Math.random() * colors.length)];
+  frag.style.borderRadius = (Math.random() < 0.22 ? '50%' : '2px');
+  frag.style.background   = pool[Math.floor(Math.random() * pool.length)];
   frag.style.animationDuration = dur + 's';
 
   const angle = Math.random() * Math.PI * 2;
-  const dist  = big ? (110 + Math.random() * 200) : (70 + Math.random() * 130);
+  const dist  = big ? (120 + Math.random() * 210) : (80 + Math.random() * 140);
   frag.style.setProperty('--fx', (Math.cos(angle) * dist).toFixed(1) + 'px');
   frag.style.setProperty('--fy', (Math.sin(angle) * dist).toFixed(1) + 'px');
   frag.style.setProperty('--fr', (Math.random() * 900 - 450).toFixed(0) + 'deg');
@@ -194,14 +205,47 @@ function spawnFragment(x, y, big) {
 function spawnSmoke(x, y) {
   const el   = document.createElement('div');
   el.className = 'smoke-particle';
-  const size = 16 + Math.random() * 22;
+  const size = 22 + Math.random() * 34;
   el.style.left   = x + 'px';
   el.style.top    = y + 'px';
   el.style.width  = size + 'px';
   el.style.height = size + 'px';
-  el.style.setProperty('--sx', (Math.random() * 44 - 22).toFixed(1) + 'px');
+  el.style.setProperty('--sx', (Math.random() * 56 - 28).toFixed(1) + 'px');
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1700);
+  setTimeout(() => el.remove(), 2000);
+}
+
+/* ── 문 패널 날아가기 ── */
+function spawnDoorPanels(rect) {
+  const hw = rect.width / 2;
+  spawnDoorPanel(rect.left,      rect.top, hw, rect.height, -1);  // 왼쪽 문
+  spawnDoorPanel(rect.left + hw, rect.top, hw, rect.height,  1);  // 오른쪽 문
+}
+
+function spawnDoorPanel(x, y, w, h, dir) {
+  const el = document.createElement('div');
+  el.className = 'door-panel-frag';
+  el.style.left   = x + 'px';
+  el.style.top    = y + 'px';
+  el.style.width  = w + 'px';
+  el.style.height = h + 'px';
+
+  const flyX  = dir * (100 + Math.random() * 110);
+  const flyY  =         60 + Math.random() *  60;
+  const flyX2 = dir * (180 + Math.random() * 150);
+  const flyY2 =        160 + Math.random() *  90;
+  const rot1  = dir * ( 18 + Math.random() *  30);
+  const rot2  = dir * ( 42 + Math.random() *  58);
+
+  el.style.setProperty('--px',  flyX  + 'px');
+  el.style.setProperty('--py',  flyY  + 'px');
+  el.style.setProperty('--px2', flyX2 + 'px');
+  el.style.setProperty('--py2', flyY2 + 'px');
+  el.style.setProperty('--pr1', rot1  + 'deg');
+  el.style.setProperty('--pr2', rot2  + 'deg');
+
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1150);
 }
 
 function triggerGameOver() {

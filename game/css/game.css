@@ -657,16 +657,40 @@
 .smoke-particle {
   position: fixed;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(140, 130, 120, 0.82) 0%, rgba(60, 55, 50, 0) 70%);
+  background: radial-gradient(circle, rgba(165, 155, 145, 0.90) 0%, rgba(80, 75, 70, 0) 68%);
   pointer-events: none;
   z-index: 60;
-  animation: smokeFloat 1.6s ease-out forwards;
+  animation: smokeFloat 2.0s ease-out forwards;
 }
 
 @keyframes smokeFloat {
-  0%   { opacity: 0.82; transform: translate(0, 0) scale(0.55); }
-  45%  { opacity: 0.45; transform: translate(var(--sx, 0px), -48px) scale(1.5); }
-  100% { opacity: 0;    transform: translate(var(--sx, 0px), -105px) scale(3); }
+  0%   { opacity: 0.90; transform: translate(0, 0) scale(0.45); }
+  40%  { opacity: 0.55; transform: translate(var(--sx, 0px), -58px) scale(1.65); }
+  100% { opacity: 0;    transform: translate(var(--sx, 0px), -128px) scale(3.4); }
+}
+
+/* ── 문 패널 날아가기 (파괴 연출) ── */
+.door-panel-frag {
+  position: fixed;
+  z-index: 90;
+  pointer-events: none;
+  background: linear-gradient(
+    155deg,
+    #6A6E72 0%, #9EA2A6 18%, #787C80 38%,
+    #B4B8BC 54%, #646870 72%, #8C9094 100%
+  );
+  border: 3px solid #3A3E42;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.14),
+    inset 0 -2px 0 rgba(0,0,0,0.28),
+    3px 5px 14px rgba(0,0,0,0.55);
+  animation: doorPanelFly 1.05s cubic-bezier(0.12, 0, 0.88, 1) forwards;
+}
+
+@keyframes doorPanelFly {
+  0%   { opacity: 1;    transform: translate(0px, 0px) rotate(0deg); }
+  62%  { opacity: 0.88; transform: translate(var(--px),  var(--py))  rotate(var(--pr1)); }
+  100% { opacity: 0;    transform: translate(var(--px2), var(--py2)) rotate(var(--pr2)); }
 }
 
 .door-frame.smash-hit {
