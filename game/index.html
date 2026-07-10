@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1280">
+  <title>엘레베이터 기다리는게임</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+
+  <!-- ════════════════════ GAME ════════════════════ -->
+  <div id="game">
+
+    <!-- ── 상단 바: 분노 게이지(중앙) + 10F(우상단) + 타이머(좌) ── -->
+    <div id="top-bar">
+      <div id="timer-wrap">
+        <span id="timer-value">60</span>
+        <span id="timer-unit">초</span>
+      </div>
+
+      <div id="rage-section">
+        <div id="rage-label-row">
+          <span id="rage-label">분노</span>
+          <span id="rage-value">0<span id="rage-max">/100</span></span>
+        </div>
+        <div id="rage-track">
+          <div id="rage-bar"></div>
+        </div>
+      </div>
+
+      <!-- 10F 실물 표시판 -->
+      <div id="floor-sign">
+        <div id="floor-sign-inner">
+          <span id="floor-number">10</span><span id="floor-unit">F</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 엘리베이터 영역: 화면 꽉 채움 ── -->
+    <div id="elevator-row">
+
+      <!-- 엘베 A -->
+      <div class="elev-unit" id="elev-a">
+        <div class="floor-display" id="disp-a">
+          <span class="floor-disp-text" id="disp-a-text">B2</span>
+        </div>
+        <div class="door-frame" id="frame-a">
+          <div class="door-half door-l" id="door-a-l"></div>
+          <div class="door-seam"></div>
+          <div class="door-half door-r" id="door-a-r"></div>
+          <div class="door-badge hidden" id="badge-a"></div>
+          <div class="coworker hidden" id="coworker-a"></div>
+        </div>
+        <div class="elev-label">엘베 A</div>
+      </div>
+
+      <!-- 엘베 B -->
+      <div class="elev-unit" id="elev-b">
+        <div class="floor-display" id="disp-b">
+          <span class="floor-disp-text" id="disp-b-text">9F</span>
+        </div>
+        <div class="door-frame" id="frame-b">
+          <div class="door-half door-l" id="door-b-l"></div>
+          <div class="door-seam"></div>
+          <div class="door-half door-r" id="door-b-r"></div>
+          <div class="door-badge hidden" id="badge-b"></div>
+          <div class="coworker hidden" id="coworker-b"></div>
+        </div>
+        <div class="elev-label">엘베 B</div>
+      </div>
+
+      <!-- 엘베 C -->
+      <div class="elev-unit" id="elev-c">
+        <div class="floor-display" id="disp-c">
+          <span class="floor-disp-text" id="disp-c-text">1F</span>
+        </div>
+        <div class="door-frame" id="frame-c">
+          <div class="door-half door-l" id="door-c-l"></div>
+          <div class="door-seam"></div>
+          <div class="door-half door-r" id="door-c-r"></div>
+          <div class="door-badge hidden" id="badge-c"></div>
+        </div>
+        <div class="elev-label">엘베 C</div>
+      </div>
+
+    </div>
+    <!-- /elevator-row -->
+
+    <!-- ── 하단 바: 상태텍스트 + 호출 버튼 ── -->
+    <div id="bottom-bar">
+      <div id="status-text">엘레베이터를 부르세요</div>
+      <div id="btn-area">
+        <div id="urgent-msg" class="hidden">빨리 눌러요!</div>
+        <div id="call-row">
+          <div id="arrow-left" class="btn-arrows">
+            <span>◀</span><span>◀</span><span>◀</span>
+          </div>
+          <button id="call-btn" class="idle">호출</button>
+          <div id="arrow-right" class="btn-arrows">
+            <span>▶</span><span>▶</span><span>▶</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /game -->
+
+  <!-- ════════════════════ END SCREEN ════════════════════ -->
+  <div id="end-screen" class="hidden">
+    <!-- TODO: 엔딩 연출 (캐릭터, 로고 등) 추가 예정 -->
+    <div id="end-box">
+      <h1 id="end-title">게임 종료</h1>
+      <!-- TODO: 결과 스탯 추가 예정 -->
+      <button id="restart-btn">다시 시작</button>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
