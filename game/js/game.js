@@ -263,5 +263,13 @@ function enterSmashMode() {
   setStatus('분노가 한계를 넘었다!! 직접 부숴버리자!!');
   // 고장/점검 배지 제거
   ['a', 'b', 'c'].forEach(id => hideBadge(id));
+  // 스매쉬 힌트 표시 (엘베 클릭 유도)
+  ['a', 'b', 'c'].forEach(id => {
+    const hint = document.createElement('div');
+    hint.className = 'smash-hint';
+    hint.id = 'smash-hint-' + id;
+    hint.textContent = '때려!';
+    $('elev-' + id).appendChild(hint);
+  });
   // 엘베 클릭 활성화 → main.js의 setupSmashClicks()가 처리
 }

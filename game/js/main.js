@@ -140,6 +140,10 @@ function destroyElevator(id, frame) {
   // 파괴음
   playDestroySound();
 
+  // 스매쉬 힌트 제거
+  const hint = $('smash-hint-' + id);
+  if (hint) hint.remove();
+
   // 문 패널이 날아가는 연출 (즉시)
   spawnDoorPanels(rect);
 
