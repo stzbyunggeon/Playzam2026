@@ -257,13 +257,38 @@
     0 8px 24px rgba(0,0,0,0.5);
 }
 
-/* 문 패널 (좌/우) */
+/* 군중 (문 뒤 엘베 내부) */
+.crowd {
+  position: absolute;
+  inset: 0;
+  z-index: 1;                               /* 문 패널(z-index:2) 뒤에 위치 */
+  background: linear-gradient(180deg, #18141e 0%, #0e0c14 100%);
+  display: flex;
+  align-items: flex-end;                    /* 사람들이 바닥에 서있게 */
+  justify-content: space-evenly;
+  padding: 0 6px;
+  gap: 4px;
+}
+
+.person {
+  flex: 1;
+  max-width: 72px;
+}
+
+.person svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 문 패널 (좌/우) — z-index:2 로 군중 위에 렌더링 */
 .door-half {
   flex: 1;
   height: 100%;
   transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  z-index: 2;
 }
 
 .door-l {
@@ -320,11 +345,13 @@
   transform: translateX(-50%);
   z-index: 4;
   box-shadow: 0 0 8px rgba(0,0,0,0.9);
+  transition: opacity 0.3s ease;
 }
 
 /* 열림 */
-.door-frame.door-open .door-l { transform: translateX(-100%); }
-.door-frame.door-open .door-r { transform: translateX(100%); }
+.door-frame.door-open .door-l    { transform: translateX(-100%); }
+.door-frame.door-open .door-r    { transform: translateX(100%); }
+.door-frame.door-open .door-seam { opacity: 0; }
 
 
 /* ── 상태 배지 (만원/고장/점검중) ── */
@@ -355,40 +382,21 @@
   to   { transform: translate(-50%,-50%) scale(1); opacity:1; }
 }
 
-/* ── 동료 (이벤트6) ── */
-.coworker {
-  position: absolute;
-  bottom: 12px;
-  left: -50px;
-  width: 36px;
-  height: 56px;
-  z-index: 8;
-  transition: left 0.45s ease-in;
+/* ── 군중 진입 애니메이션 (이벤트5: 동료들이 우르르 탑승) ── */
+.crowd.entering .person {
+  animation: personEnter 0.38s ease-out forwards;
+  opacity: 0;
 }
+.crowd.entering .person:nth-child(1) { animation-delay: 0.00s; }
+.crowd.entering .person:nth-child(2) { animation-delay: 0.14s; }
+.crowd.entering .person:nth-child(3) { animation-delay: 0.28s; }
+.crowd.entering .person:nth-child(4) { animation-delay: 0.42s; }
+.crowd.entering .person:nth-child(5) { animation-delay: 0.56s; }
 
-.coworker::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 24px; height: 24px;
-  background: #F0B060;
-  border-radius: 50%;
-  border: 3px solid #C07030;
+@keyframes personEnter {
+  from { transform: translateX(70px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
-
-.coworker::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 30px; height: 32px;
-  background: #4060A0;
-  border-radius: 4px 4px 0 0;
-  border: 2px solid #204080;
-}
-
-.coworker.enter { left: 28%; }
 
 
 /* ═══════════════════════════════════════════════════
@@ -603,12 +611,9 @@
   letter-spacing: 2px;
 }
 
-/* 파편 */
+/* 파편 — width/height는 JS에서 인라인으로 설정 */
 .fragment {
   position: fixed;
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
   pointer-events: none;
   z-index: 100;
   animation: fragmentFly 0.7s ease-out forwards;
@@ -616,7 +621,52 @@
 
 @keyframes fragmentFly {
   0%  { opacity:1; transform:translate(0,0) rotate(0) scale(1); }
-  100%{ opacity:0; transform:translate(var(--fx),var(--fy)) rotate(var(--fr)) scale(0.2); }
+  100%{ opacity:0; transform:translate(var(--fx),var(--fy)) rotate(var(--fr)) scale(0.15); }
+}
+
+/* ── 파괴된 엘베 ── */
+.door-frame.smashed {
+  filter: brightness(0.22) saturate(0.06) contrast(1.4);
+  box-shadow:
+    inset 0 0 60px rgba(255, 60, 0, 0.55),
+    0 0 28px rgba(255, 40, 0, 0.3);
+  transition: filter 0.45s ease, box-shadow 0.45s ease;
+}
+
+.door-frame.smashed::after {
+  content: '';
+  position: absolute;
+  top: 26%;
+  left: 16%;
+  width: 68%;
+  height: 56%;
+  background: radial-gradient(ellipse at 48% 52%,
+    #000 0%,
+    rgba(15, 4, 0, 0.92) 45%,
+    transparent 100%
+  );
+  border-radius: 44% 56% 40% 60% / 58% 42% 57% 43%;
+  box-shadow:
+    0 0 0 2px rgba(255, 90, 20, 0.45),
+    0 0 22px 5px rgba(255, 50, 0, 0.35);
+  z-index: 15;
+  pointer-events: none;
+}
+
+/* ── 연기 파티클 ── */
+.smoke-particle {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(140, 130, 120, 0.82) 0%, rgba(60, 55, 50, 0) 70%);
+  pointer-events: none;
+  z-index: 60;
+  animation: smokeFloat 1.6s ease-out forwards;
+}
+
+@keyframes smokeFloat {
+  0%   { opacity: 0.82; transform: translate(0, 0) scale(0.55); }
+  45%  { opacity: 0.45; transform: translate(var(--sx, 0px), -48px) scale(1.5); }
+  100% { opacity: 0;    transform: translate(var(--sx, 0px), -105px) scale(3); }
 }
 
 .door-frame.smash-hit {

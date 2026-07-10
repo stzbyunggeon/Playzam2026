@@ -91,6 +91,11 @@ function onCallBtnClick() {
 /* ══════════════════════════════════════════════════
    SMASH 모드 — 엘베 클릭 파괴
 ══════════════════════════════════════════════════ */
+const smashCounts    = { a: 0, b: 0, c: 0 };
+const smokeIntervals = {};
+let   destroyedCount = 0;
+const SMASH_DESTROY  = 5;   // 이 횟수 이상 타격 시 파괴
+
 function setupSmashClicks() {
   ['a', 'b', 'c'].forEach(id => {
     const frame = $('frame-' + id);
@@ -102,40 +107,129 @@ function setupSmashClicks() {
 }
 
 function smashElevator(id, frame) {
+  if (frame.classList.contains('smashed')) return;  // 이미 파괴됨
+
   playHitSound();
 
-  // 타격 흔들림 애니메이션
+  // 타격 흔들림
   frame.classList.add('smash-hit');
   setTimeout(() => frame.classList.remove('smash-hit'), 280);
 
-  // 파편 파티클 생성
-  const rect = frame.getBoundingClientRect();
-  for (let i = 0; i < 10; i++) {
+  // 파편 생성
+  const rect  = frame.getBoundingClientRect();
+  const count = 16 + Math.floor(Math.random() * 8);
+  for (let i = 0; i < count; i++) {
     spawnFragment(
       rect.left + Math.random() * rect.width,
-      rect.top  + Math.random() * rect.height
+      rect.top  + Math.random() * rect.height,
+      false
     );
+  }
+
+  // 파괴 임계값 체크
+  smashCounts[id]++;
+  if (smashCounts[id] >= SMASH_DESTROY) {
+    destroyElevator(id, frame);
   }
 }
 
-function spawnFragment(x, y) {
-  const colors = ['#B8BDC4', '#8A8D91', '#4a9eff', '#FFB020', '#FF6040'];
-  const frag = document.createElement('div');
+function destroyElevator(id, frame) {
+  frame.classList.add('smashed');
+
+  // 폭발 파편 (대량)
+  const rect = frame.getBoundingClientRect();
+  for (let i = 0; i < 32; i++) {
+    setTimeout(() => {
+      spawnFragment(
+        rect.left + Math.random() * rect.width,
+        rect.top  + Math.random() * rect.height,
+        true
+      );
+    }, Math.random() * 320);
+  }
+
+  // 연기 방출
+  const cx = rect.left + rect.width  * 0.5;
+  const cy = rect.top  + rect.height * 0.42;
+  smokeIntervals[id] = setInterval(() => {
+    spawnSmoke(
+      cx + (Math.random() - 0.5) * rect.width  * 0.55,
+      cy + (Math.random() - 0.5) * rect.height * 0.28
+    );
+  }, 250);
+
+  destroyedCount++;
+  if (destroyedCount >= 3) {
+    setTimeout(triggerGameOver, 2200);
+  }
+}
+
+function spawnFragment(x, y, big) {
+  const colors = ['#C0C4C8', '#9A9DA1', '#D4D7DA', '#FFB020', '#FF5030', '#FF2020', '#FFC040'];
+  const frag   = document.createElement('div');
   frag.className = 'fragment';
-  frag.style.cssText = [
-    'left:'       + x + 'px',
-    'top:'        + y + 'px',
-    'background:' + colors[Math.floor(Math.random() * colors.length)],
-  ].join(';');
+
+  const w   = big ? (12 + Math.random() * 22) : (5 + Math.random() * 12);
+  const h   = w * (0.22 + Math.random() * 0.88);
+  const dur = 0.50 + Math.random() * 0.45;
+
+  frag.style.left         = x + 'px';
+  frag.style.top          = y + 'px';
+  frag.style.width        = w.toFixed(0) + 'px';
+  frag.style.height       = h.toFixed(0) + 'px';
+  frag.style.borderRadius = (Math.random() < 0.35 ? '50%' : '2px');
+  frag.style.background   = colors[Math.floor(Math.random() * colors.length)];
+  frag.style.animationDuration = dur + 's';
 
   const angle = Math.random() * Math.PI * 2;
-  const dist  = 60 + Math.random() * 90;
+  const dist  = big ? (110 + Math.random() * 200) : (70 + Math.random() * 130);
   frag.style.setProperty('--fx', (Math.cos(angle) * dist).toFixed(1) + 'px');
   frag.style.setProperty('--fy', (Math.sin(angle) * dist).toFixed(1) + 'px');
-  frag.style.setProperty('--fr', (Math.random() * 720 - 360).toFixed(0) + 'deg');
+  frag.style.setProperty('--fr', (Math.random() * 900 - 450).toFixed(0) + 'deg');
 
   document.body.appendChild(frag);
-  setTimeout(() => frag.remove(), 750);
+  setTimeout(() => frag.remove(), (dur + 0.1) * 1000);
+}
+
+function spawnSmoke(x, y) {
+  const el   = document.createElement('div');
+  el.className = 'smoke-particle';
+  const size = 16 + Math.random() * 22;
+  el.style.left   = x + 'px';
+  el.style.top    = y + 'px';
+  el.style.width  = size + 'px';
+  el.style.height = size + 'px';
+  el.style.setProperty('--sx', (Math.random() * 44 - 22).toFixed(1) + 'px');
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1700);
+}
+
+function triggerGameOver() {
+  state.phase = 'ended';
+  // 연기 정지
+  Object.keys(smokeIntervals).forEach(id => {
+    clearInterval(smokeIntervals[id]);
+    delete smokeIntervals[id];
+  });
+
+  const overlay    = $('end-screen');
+  const restartBtn = $('restart-btn');
+  const title      = $('end-title');
+
+  title.textContent          = '계단으로 가자...';
+  restartBtn.style.opacity       = '0';
+  restartBtn.style.pointerEvents = 'none';
+
+  overlay.classList.remove('hidden');
+  void overlay.offsetWidth;        // reflow → transition 활성화
+  overlay.classList.add('fade-in');
+
+  // 재시작 버튼 3.8초 후 등장
+  setTimeout(() => {
+    restartBtn.style.transition    = 'opacity 0.7s ease';
+    restartBtn.style.opacity       = '1';
+    restartBtn.style.pointerEvents = '';
+  }, 3800);
 }
 
 /* ══════════════════════════════════════════════════

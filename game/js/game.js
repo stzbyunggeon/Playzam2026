@@ -10,146 +10,146 @@ const state = {
 };
 
 /* ══════════════════════════════════════════════════
-   8개 고정 이벤트 (순서 절대 변경 금지)
+   6개 고정 이벤트 (순서 절대 변경 금지) — 합계 분노 100
 ══════════════════════════════════════════════════ */
 const EVENTS = [
-  /* 1. 지하2층 엘베가 잡힘 — 가장 먼 거리 +8 */
+  /* 1. 가장 먼 엘베(A/B2) 잡힘 → 만원 → A 다시 내려감 — +18 */
   {
-    rageAdd: 8,
+    rageAdd: 18,
     play(onDone) {
       selectElev('a');
       setFloorDisplay('a', 'B2');
-      setStatus('지하 2층 엘베가 응답했습니다... 가장 먼 곳이잖아요');
+      setStatus('<span style="color:#FF3030">가장 먼 엘베</span>가 응답했습니다...');
       animateFloor('a', -2, 10, 260, () => {
         setStatus('드디어 도착했습니다!');
-        onDone();
+        showCrowd('a');
+        setTimeout(() => {
+          openDoor('a');
+          setTimeout(() => {
+            setStatus('자리가 없습니다!!');
+            setTimeout(() => {
+              closeDoor('a');
+              setTimeout(() => {
+                hideCrowd('a');
+                setStatus('엘베가 다시 내려갑니다...');
+                animateFloor('a', 10, -2, 200, null); // 배경 연출, 완료 대기 안함
+                setTimeout(onDone, 800);
+              }, 600);
+            }, 1800);
+          }, 650);
+        }, 400);
       });
     }
   },
 
-  /* 2. 도착했지만 만원 — +14 */
+  /* 2. B 호출 → 9층에서 5층으로 내려갔다가 올라오던 중 고장 — +14 */
   {
     rageAdd: 14,
     play(onDone) {
-      selectElev('a');
-      setStatus('문이 열립니다...');
+      selectElev('b');
+      setFloorDisplay('b', '9F');
+      setStatus('다른 엘베를 호출합니다...');
       setTimeout(() => {
-        openDoor('a');
+        animateFloor('b', 9, 5, 310, () => {
+          setStatus('어? 왜 내려가지...?');
+          animateFloor('b', 5, 8, 290, () => {
+            setStatus('다시 올라오네! 이번엔 될 것 같아!!');
+            setTimeout(() => {
+              flickerFloor('b', 6, () => {
+                showBadge('b', 'broken', '고장');
+                setStatus('고장으로 운행이 취소됐습니다!');
+                setTimeout(onDone, 1600);
+              });
+            }, 300);
+          });
+        });
+      }, 600);
+    }
+  },
+
+  /* 3. C가 9층까지 왔다가 B2에 있던 A로 배정 바뀜 — +16 */
+  {
+    rageAdd: 16,
+    play(onDone) {
+      selectElev('c');
+      setFloorDisplay('c', '1F');
+      setStatus('다른 엘베가 올라오고 있습니다...');
+      animateFloor('c', 1, 9, 300, () => {
+        setStatus('9층까지 왔는데...?!');
         setTimeout(() => {
-          showBadge('a', 'full', '만원');
-          setStatus('빈 자리가 없습니다!!');
+          selectElev('a');
+          setFloorDisplay('a', 'B2');
+          setStatus('갑자기 <span style="color:#FF3030">B2</span>에 있는 다른 엘베로 바뀌었습니다!!!');
+          setTimeout(onDone, 1800);
+        }, 800);
+      });
+    }
+  },
+
+  /* 4. 기다린 A가 왔지만 동료들이 우르르 타버림 — +18 */
+  {
+    rageAdd: 18,
+    play(onDone) {
+      selectElev('a');
+      setStatus('배정된 엘베가 B2층에서 올라오고 있습니다...');
+      animateFloor('a', -2, 10, 260, () => {
+        setStatus('드디어 왔다!! 이번엔 탈 수 있어!!!');
+        setTimeout(() => {
+          openDoor('a');
+          showCrowdEntering('b');          // crowd-b는 frame-a 안에 위치
+          setStatus('아......');
           setTimeout(() => {
             closeDoor('a');
-            hideBadge('a');
-            setTimeout(onDone, 700);
-          }, 1700);
-        }, 650);
-      }, 400);
-    }
-  },
-
-  /* 3. 재호출 → 고장 — +10 */
-  {
-    rageAdd: 10,
-    play(onDone) {
-      selectElev('b');
-      setStatus('엘베 B를 재호출 중...');
-      setTimeout(() => {
-        flickerFloor('b', 5, () => {
-          showBadge('b', 'broken', '고장');
-          setStatus('고장으로 운행이 취소됐습니다!');
-          setTimeout(onDone, 1600);
-        });
-      }, 600);
-    }
-  },
-
-  /* 4. 다른 엘베가 방향 바꿔 내려감 — +12 */
-  {
-    rageAdd: 12,
-    play(onDone) {
-      selectElev('c');
-      setFloorDisplay('c', '1F');
-      setStatus('엘베 C가 올라오고 있습니다...');
-      animateFloor('c', 1, 6, 320, () => {
-        setStatus('어?! 방향을 바꿔 내려가고 있습니다!');
-        animateFloor('c', 6, 1, 280, () => {
-          setTimeout(onDone, 600);
-        });
+            setTimeout(() => {
+              hideCrowd('b');
+              setStatus('엘베가 1층으로 내려가고 있습니다...');
+              animateFloor('a', 10, 1, 200, null); // 배경 연출, 완료 대기 안함
+              setTimeout(onDone, 800);
+            }, 500);
+          }, 1600);
+        }, 400);
       });
     }
   },
 
-  /* 5. 문 열리려다 다시 닫힘 — +10 */
-  {
-    rageAdd: 10,
-    play(onDone) {
-      selectElev('a');
-      setStatus('엘베 A가 다시 응답합니다...');
-      setTimeout(() => {
-        peekDoor('a');
-        setStatus('문이 열리려는데...');
-        setTimeout(() => {
-          closeDoor('a');
-          setStatus('반응할 틈도 없이 이미 닫혔습니다');
-          setTimeout(onDone, 1000);
-        }, 800);
-      }, 600);
-    }
-  },
-
-  /* 6. 옆 동료 새치기 — +14 */
+  /* 5. C 재호출 → 점검중 — +14 */
   {
     rageAdd: 14,
     play(onDone) {
-      selectElev('b');
-      setStatus('엘베 B 문이 열립니다!');
-      setTimeout(() => {
-        openDoor('b');
-        setTimeout(() => {
-          showCoworker('b', () => {
-            closeDoor('b');
-            setStatus('옆 동료가 먼저 타고 문이 닫혔습니다!!');
-            setTimeout(onDone, 1200);
-          });
-        }, 500);
-      }, 400);
-    }
-  },
-
-  /* 7. 점검중 — +12 */
-  {
-    rageAdd: 12,
-    play(onDone) {
       selectElev('c');
-      setFloorDisplay('c', '1F');
-      setStatus('엘베 C가 다시 움직입니다...');
-      animateFloor('c', 1, 5, 340, () => {
+      setStatus('남은 엘베를 다시 호출합니다...');
+      animateFloor('c', 9, 10, 500, () => {
         showBadge('c', 'repair', '점검중');
-        setStatus('점검 중으로 갑자기 멈춰버렸습니다');
+        setStatus('점검 중으로 갑자기 멈춰버렸습니다!');
         setTimeout(onDone, 1800);
       });
     }
   },
 
-  /* 8. 도착 직전 다른 층 호출에 뺏김 → 분노 100 — +20 */
+  /* 6. A밖에 없으니 호출 → 또 만원 → 분노 100 — +20 */
   {
     rageAdd: 20,
     play(onDone) {
       selectElev('a');
       setFloorDisplay('a', '3F');
-      setStatus('엘베 A가 다시 올라오고 있어요... 이번엔 꼭!!');
-      setTimeout(() => {
-        animateFloor('a', 3, 9, 255, () => {
-          setStatus('9층... 이번엔 진짜다!!!');
+      setStatus('엘베가 하나밖에 안 남았네...');
+      animateFloor('a', 3, 10, 280, () => {
+        setStatus('이번엔 진짜 탈 수 있겠지...!!');
+        showCrowd('a');
+        setTimeout(() => {
+          openDoor('a');
           setTimeout(() => {
-            setStatus('다른 층 호출에 뺏겼습니다!!!');
-            animateFloor('a', 9, 4, 230, () => {
-              setTimeout(onDone, 600);
-            });
-          }, 950);
-        });
-      }, 500);
+            setStatus('또 <span style="color:#FF3030">만원</span>이야....');
+            setTimeout(() => {
+              closeDoor('a');
+              setTimeout(() => {
+                hideCrowd('a');
+                setTimeout(onDone, 400);
+              }, 600);
+            }, 2000);
+          }, 650);
+        }, 400);
+      });
     }
   },
 ];
@@ -192,22 +192,29 @@ function hideBadge(id) {
   b.className = 'door-badge hidden';
 }
 
-function showCoworker(id, onDone) {
-  const el = $('coworker-' + id);
-  el.classList.remove('hidden', 'enter');
-  void el.offsetWidth;
-  el.classList.add('enter');
-  setTimeout(() => {
-    el.classList.add('hidden');
-    if (onDone) onDone();
-  }, 600);
+function showCrowd(id) {
+  const el = $('crowd-' + id);
+  if (el) el.classList.remove('hidden');
+}
+
+function showCrowdEntering(id) {
+  const el = $('crowd-' + id);
+  if (!el) return;
+  el.classList.remove('hidden', 'entering');
+  void el.offsetWidth;               // reflow → 애니메이션 재시작
+  el.classList.add('entering');
+}
+
+function hideCrowd(id) {
+  const el = $('crowd-' + id);
+  if (el) { el.classList.add('hidden'); el.classList.remove('entering'); }
 }
 
 /* ══════════════════════════════════════════════════
    상태 텍스트
 ══════════════════════════════════════════════════ */
 function setStatus(text) {
-  $('status-text').textContent = text;
+  $('status-text').innerHTML = text;
 }
 
 /* ══════════════════════════════════════════════════
@@ -293,5 +300,7 @@ function enterSmashMode() {
   // 화살표 숨김
   $('btn-area').classList.remove('ready', 'ready-2', 'ready-3', 'ready-4');
   setStatus('분노가 한계를 넘었다!! 직접 부숴버리자!!');
+  // 고장/점검 배지 제거
+  ['a', 'b', 'c'].forEach(id => hideBadge(id));
   // 엘베 클릭 활성화 → main.js의 setupSmashClicks()가 처리
 }
