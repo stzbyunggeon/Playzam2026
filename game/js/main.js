@@ -85,6 +85,7 @@ function checkUrgency() {
 ══════════════════════════════════════════════════ */
 function onCallBtnClick() {
   if (state.phase !== 'waiting_click') return;
+  playCallSound();
   playEvent(state.eventIndex);
 }
 
@@ -135,6 +136,9 @@ function smashElevator(id, frame) {
 
 function destroyElevator(id, frame) {
   const rect = frame.getBoundingClientRect();
+
+  // 파괴음
+  playDestroySound();
 
   // 문 패널이 날아가는 연출 (즉시)
   spawnDoorPanels(rect);

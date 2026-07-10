@@ -137,7 +137,7 @@ function clearElevHighlights() {
   });
 }
 
-function openDoor(id)  { $('frame-' + id).classList.add('door-open'); }
+function openDoor(id)  { $('frame-' + id).classList.add('door-open'); playDoorOpenSound(); }
 function closeDoor(id) { $('frame-' + id).classList.remove('door-open', 'door-peek'); }
 function peekDoor(id)  { $('frame-' + id).classList.add('door-peek'); }
 
