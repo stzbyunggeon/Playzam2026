@@ -13,10 +13,11 @@ function floorText(f) {
 /**
  * 층 표시를 fromFloor → toFloor 순서로 숫자를 바꿔가며 애니메이션
  * onDone: 마지막 층 도달 후 intervalMs 대기 후 호출
- * onDone이 null이면 배경 연출용 → 이동음 없음
+ * withSound: true 이면 onDone이 null이어도 이동음 재생 (기본값: !!onDone)
  */
-function animateFloor(elevId, fromFloor, toFloor, intervalMs, onDone) {
-  if (onDone) startElevSound();
+function animateFloor(elevId, fromFloor, toFloor, intervalMs, onDone, withSound) {
+  const playSound = withSound !== undefined ? withSound : !!onDone;
+  if (playSound) startElevSound();
   const dir = fromFloor < toFloor ? 1 : -1;
   let cur = fromFloor;
   const el = $('disp-' + elevId + '-text');
@@ -30,7 +31,8 @@ function animateFloor(elevId, fromFloor, toFloor, intervalMs, onDone) {
     el.classList.add('updating');
 
     if (cur === toFloor) {
-      if (onDone) { stopElevSound(); setTimeout(onDone, intervalMs); }
+      if (playSound) stopElevSound();
+      if (onDone) setTimeout(onDone, intervalMs);
     } else {
       setTimeout(step, intervalMs);
     }
@@ -94,7 +96,7 @@ function playHitSound() {
     const src = ctx.createBufferSource();
     src.buffer = buf;
     const g = ctx.createGain();
-    g.gain.value = 1;
+    g.gain.value = 0.5;
     src.connect(g);
     g.connect(ctx.destination);
     src.start();
@@ -222,7 +224,7 @@ function playDestroySound() {
     const nsrc = ctx.createBufferSource();
     nsrc.buffer = buf;
     const ng = ctx.createGain();
-    ng.gain.value = 1.4;
+    ng.gain.value = 0.65;
     nsrc.connect(ng);
     ng.connect(ctx.destination);
     nsrc.start(t);
@@ -233,7 +235,7 @@ function playDestroySound() {
     osc.frequency.setValueAtTime(90, t);
     osc.frequency.exponentialRampToValueAtTime(18, t + 0.5);
     const og = ctx.createGain();
-    og.gain.setValueAtTime(0.9, t);
+    og.gain.setValueAtTime(0.45, t);
     og.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
     osc.connect(og);
     og.connect(ctx.destination);

@@ -32,7 +32,7 @@ const EVENTS = [
               setTimeout(() => {
                 hideCrowd('a');
                 setStatus('엘베가 다시 내려갑니다...');
-                animateFloor('a', 10, -2, 200, null); // 배경 연출, 완료 대기 안함
+                animateFloor('a', 10, -2, 200, null, true); // 배경 연출, 사운드는 재생
                 setTimeout(onDone, 800);
               }, 600);
             }, 1400);
